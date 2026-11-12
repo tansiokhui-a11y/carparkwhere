@@ -8,7 +8,7 @@ interface HeaderProps {
   lastUpdated: string;
   isSyncing: boolean;
   onRefresh: () => void;
-  dataSource: 'data.gov.sg' | 'backend' | 'simulation';
+  dataSource: 'LTA DataMall' | 'data.gov.sg' | 'backend' | 'simulation';
   isDarkMode: boolean;
   onToggleTheme: () => void;
 }
@@ -101,7 +101,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Data Source & Timestamp Indicator */}
           <div className="hidden lg:flex flex-col text-right pr-2 border-r border-slate-200 dark:border-slate-800">
             <span className="text-[11px] font-semibold text-slate-800 dark:text-slate-200">
-              {dataSource === 'data.gov.sg' ? 'Gov Transport API' : 'Simulated Real-Time'}
+              {dataSource === 'LTA DataMall' ? 'LTA DataMall Live' : dataSource === 'data.gov.sg' ? 'Gov Transport API' : 'Simulated Stream'}
             </span>
             <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
               Updated {lastUpdated}

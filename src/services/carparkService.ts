@@ -17,11 +17,12 @@ const BACKEND_ENDPOINT = (import.meta as unknown as { env?: { VITE_BACKEND_API_U
 
 export interface SyncResult {
   carparks: Carpark[];
-  source: 'data.gov.sg' | 'backend' | 'simulation';
+  source: 'LTA DataMall' | 'data.gov.sg' | 'backend' | 'simulation';
   timestamp: string;
   matchedCount: number;
   totalLotsInSG: number;
   availableLotsInSG: number;
+  ltaKeyConfigured?: boolean;
 }
 
 export interface GovApiItem {
@@ -45,7 +46,59 @@ export async function fetchLiveCarparkData(currentCarparks: Carpark[] = INITIAL_
   const now = new Date();
   const timeFormatted = now.toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-  // 1. If user has configured their custom backend endpoint, query it first
+  // 1. Try our serverless /api/carparkavailability endpoint (LTA DataMall)
+  try {
+    const ltaRes = await fetch('/api/carparkavailability');
+    if (ltaRes.ok) {
+      const ltaJson = await ltaRes.json();
+      if (ltaJson.status === 'success' && Array.isArray(ltaJson.data) && ltaJson.data.length > 0) {
+        // Map LTA DataMall items by CarParkID and Development name
+        const ltaMap = new Map<string, number>();
+        for (const item of ltaJson.data) {
+          if (item.id) ltaMap.set(String(item.id).toUpperCase(), Number(item.availableLots) || 0);
+          if (item.name) ltaMap.set(String(item.name).toLowerCase(), Number(item.availableLots) || 0);
+        }
+
+        let matched = 0;
+        const updated = currentCarparks.map(cp => {
+          const byId = ltaMap.get(cp.id.toUpperCase());
+          const byName = ltaMap.get(cp.name.toLowerCase());
+          const avail = byId !== undefined ? byId : byName;
+
+          if (avail !== undefined) {
+            matched++;
+            return {
+              ...cp,
+              availableLots: avail,
+              vehicleTypes: {
+                ...cp.vehicleTypes,
+                car: {
+                  ...cp.vehicleTypes.car,
+                  available: Math.min(cp.vehicleTypes.car.total, avail)
+                }
+              },
+              lastUpdated: timeFormatted
+            };
+          }
+          return simulateLiveFluctuation(cp, timeFormatted);
+        });
+
+        return {
+          carparks: updated,
+          source: 'LTA DataMall',
+          timestamp: timeFormatted,
+          matchedCount: matched,
+          totalLotsInSG: calculateTotal(updated),
+          availableLotsInSG: calculateAvailable(updated),
+          ltaKeyConfigured: true
+        };
+      }
+    }
+  } catch {
+    // If not running in same domain or key not configured, fall through
+  }
+
+  // 2. If user has configured their custom backend endpoint, query it
   if (BACKEND_ENDPOINT) {
     try {
       const res = await fetch(BACKEND_ENDPOINT);

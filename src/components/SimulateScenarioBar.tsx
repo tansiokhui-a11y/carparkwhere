@@ -3,7 +3,7 @@ import { Play, Code, Check, ExternalLink, ChevronDown, ChevronUp, Terminal } fro
 
 interface SimulateScenarioBarProps {
   onApplyScenario: (scenario: 'cbd_rush' | 'orchard_weekend' | 'midnight' | 'normal') => void;
-  dataSource: 'data.gov.sg' | 'backend' | 'simulation';
+  dataSource: 'LTA DataMall' | 'data.gov.sg' | 'backend' | 'simulation';
 }
 
 export const SimulateScenarioBar: React.FC<SimulateScenarioBarProps> = ({
@@ -74,42 +74,44 @@ export const SimulateScenarioBar: React.FC<SimulateScenarioBarProps> = ({
           </button>
         </div>
 
-        {/* Right: Backend Integration Guide Toggle */}
+        {/* Right: Serverless & LTA Guide Toggle */}
         <div className="flex items-center gap-2 text-xs">
           <button
             onClick={() => setShowBackendGuide(!showBackendGuide)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700"
           >
             <Code className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Backend Integration Notes</span>
+            <span>Serverless &amp; LTA DataMall Endpoints</span>
             {showBackendGuide ? <ChevronUp className="w-3.5 h-3.5 ml-0.5" /> : <ChevronDown className="w-3.5 h-3.5 ml-0.5" />}
           </button>
         </div>
 
       </div>
 
-      {/* Expandable Backend Integration Helper */}
+      {/* Expandable Serverless & Backend Integration Helper */}
       {showBackendGuide && (
         <div className="mt-4 pt-4 border-t border-slate-800 text-xs space-y-3">
           <div className="flex items-start gap-2 text-slate-300">
             <Terminal className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-white">How to connect your custom backend later:</p>
-              <p className="text-slate-400 mt-1">
-                The frontend already communicates through <code className="text-cyan-300 font-mono">/src/services/carparkService.ts</code>. When your backend (Express/NestJS/Go/Python or Firebase) is ready, simply point the environment variable or proxy:
-              </p>
+              <p className="font-semibold text-white">Serverless Endpoints in <code className="text-cyan-300 font-mono">/api/</code>:</p>
+              <ul className="list-disc list-inside text-slate-400 mt-1 space-y-1">
+                <li><code className="text-emerald-400 font-mono">GET /api/carparkavailability</code> — Pulls live HDB, LTA, and URA lots from LTA DataMall CarParkAvailabilityv2 with AccountKey authentication.</li>
+                <li><code className="text-emerald-400 font-mono">GET /api/health</code> — Health &amp; configuration status prober.</li>
+              </ul>
             </div>
           </div>
 
           <div className="bg-slate-950 rounded-lg p-3 font-mono text-[11px] text-slate-300 overflow-x-auto border border-slate-800">
-            <span className="text-slate-500">// 1. Set environment variable in .env</span><br />
-            <span className="text-emerald-400">VITE_BACKEND_API_URL</span>=<span className="text-amber-300">&quot;https://your-backend.com/api/carparks&quot;</span><br /><br />
-            <span className="text-slate-500">// 2. The endpoint returns JSON matching Carpark[] or GovApi:</span><br />
-            &#123; <span className="text-cyan-400">&quot;carparks&quot;</span>: [ ... ] &#125;
+            <span className="text-slate-500"># Set your key in .env or environment:</span><br />
+            <span className="text-emerald-400">LTA_ACCOUNT_KEY</span>=<span className="text-amber-300">&quot;your_lta_account_key_here&quot;</span><br /><br />
+            <span className="text-slate-500"># Test directly via curl:</span><br />
+            curl http://localhost:3000/api/carparkavailability<br />
+            curl -H &quot;AccountKey: &lt;YOUR_KEY&gt;&quot; http://localhost:3000/api/carparkavailability
           </div>
 
           <p className="text-[11px] text-slate-400">
-            Currently running on: <strong className="text-white uppercase font-mono">{dataSource}</strong> (Official Singapore Gov Data.gov.sg API + realistic fluctuation fallback).
+            Current data pipeline: <strong className="text-white uppercase font-mono">{dataSource}</strong>.
           </p>
         </div>
       )}

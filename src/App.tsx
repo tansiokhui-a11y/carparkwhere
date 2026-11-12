@@ -57,7 +57,7 @@ export default function App() {
   const [selectedCarpark, setSelectedCarpark] = useState<Carpark | null>(null);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [lastUpdated, setLastUpdated] = useState<string>('Just now');
-  const [dataSource, setDataSource] = useState<'data.gov.sg' | 'backend' | 'simulation'>('simulation');
+  const [dataSource, setDataSource] = useState<'LTA DataMall' | 'data.gov.sg' | 'backend' | 'simulation'>('simulation');
 
   // Favorites state
   const [favorites, setFavorites] = useState<string[]>(() => {
