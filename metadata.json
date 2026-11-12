@@ -1,0 +1,6 @@
+{
+  "name": "SG ParkSense",
+  "description": "Singapore real-time carpark availability tracker across HDB, URA, and major shopping destinations with live lot counts, rates calculator, and navigation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
